@@ -1,0 +1,59 @@
+name: replace
+
+# compose 文件版本
+version: '3.7'
+
+# 网络
+networks:
+  # 网络的 key
+  replace-net:
+
+# 卷
+volumes:
+  # 卷的 key, 多个服务重用卷时使用
+  replace-postgres-data:
+    # 定义 卷的名字
+    name: replace-postgres-volume
+  replace-mysql-data:
+    name: replace-mysql-volume
+
+# 服务
+services:
+  # 服务的名字
+  replace-postgres:
+    # 容器的镜像
+    image: postgres:9.6
+    # 定义 容器的名字
+    container_name: postgres-data
+    # 重启策略
+    restart: on-failure
+    # 要加入的网络
+    networks:
+      - replace-net
+    # 要挂载的卷
+    volumes:
+      - replace-postgres-data:/var/lib/postgresql/data
+    # 添加环境变量
+    environment:
+      - POSTGRES_USER=postgres-user
+      - POSTGRES_PASSWORD=postgres-password
+      - POSTGRES_DB=postgres-db
+    # 暴露端口
+    ports:
+      - '5432:5432'
+
+  replace-mysql:
+    image: mysql:5.7
+    container_name: mysql-data
+    restart: on-failure
+    networks:
+      - replace-net
+    volumes:
+      - replace-mysql-data:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=mysql-root-password
+      - MYSQL_USER=mysql-user
+      - MYSQL_PASSWORD=mysql-password
+      - MYSQL_DATABASE=mysql-db
+    ports:
+      - '3306:3306'
